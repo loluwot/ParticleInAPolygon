@@ -145,8 +145,8 @@ while True:
         sys.exit(0)
     if event == 'analyze':
         valid, *polygon_props = validate_polygon((net_state['positions'], net_state['adj_list']))
-        if valid:
-            break
+        # if valid:
+        break
     if event in toggle:
         toggle[event] = not toggle[event]
         state = toggle_states[event][toggle[event]]
@@ -174,6 +174,13 @@ sol = boundary_approx(30, polygon)
 xx = np.linspace(-1, 1, 100)
 yy = np.linspace(-1, 1, 100)
 X, Y = np.meshgrid(xx, yy)
-ax.plot_surface(X, Y, sol.n_sol(3)(X, Y)**2, cmap=cm.coolwarm, alpha=0.5,)
+ax.plot_surface(X, Y, sol.n_sol(3)(X, Y)**2, cmap=cm.coolwarm, alpha=0.9,)
 polygon.draw()
 plt.show()
+
+while True:
+    event, values = window.read()
+    if event == sg.WIN_CLOSED:
+        window.close()
+        import sys
+        sys.exit(0)
