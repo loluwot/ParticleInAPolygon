@@ -3,3 +3,9 @@ Approximating the 2D particle in a box problem for generalized boundaries. Appro
 Implementation of this paper: https://arxiv.org/pdf/0801.4291.pdf
 
 ![Example of use](I1.png)
+
+**Added features**
+- load sillhoutte of image
+- time dependent animations
+
+<img src="test.gif" alt="drawing" width="50%"/>
