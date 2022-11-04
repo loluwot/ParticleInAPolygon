@@ -61,6 +61,9 @@ class Polygon:
         self.points = np.array([(np.array(p) - avg) for p in self.points])
         self.points /= np.max([np.abs(np.min(self.points, axis=0)), np.max(self.points, axis=0)])
         
+    def bbox(self):
+        return (np.min(self.points[:, 0]), np.max(self.points[:, 0])), (np.min(self.points[:, 1]), np.max(self.points[:, 1]))
+
     def in_poly(self, point):
         points = self.points
         px, py = point
@@ -129,24 +132,30 @@ def validate_polygon(polygon):
     center = centroid(positions.values())
     def ang(points):
         vs = [[points[x][i] - points[1][i] for i in range(2)] for x in [2, 0]]
-        # print(f'ANGLE of {points}')
-        # print(((math.atan2(vs[0][1], vs[0][0]) - math.atan2(vs[1][1], vs[1][0])) + 2*math.pi) % (2*math.pi) - math.pi)
-        # print('--------------------------')
         return ((math.atan2(vs[0][1], vs[0][0]) - math.atan2(vs[1][1], vs[1][0])) + 2*math.pi) % (2*math.pi) - math.pi
     G = to_graph(adj_list)
     cycles = sorted(list(nx.simple_cycles(G.to_directed())), key=lambda x: len(x))
     if len(cycles) == 0:
         return False, None, None
     largest = cycles[-1]
-    print(largest)
-    #canonicalize to make cycles go in counterclockwise(?) order
-    rev = sign(ang([positions[largest[0]], center, positions[largest[-1]]]))
-    largest = largest[::rev]
-    circular_largest = list(map(lambda x: positions[x], largest*2))
-    concavity = [ang(circular_largest[i:i+3]) for i in range(len(largest))]
-    concavity_sign = [x < 0 for x in concavity]
+
+    return nx.cycle_graph(largest).nodes()
+
+    # print(largest)
+    # #canonicalize to make cycles go in counterclockwise(?) order
+    # rev = sign(ang([positions[largest[0]], center, positions[largest[-1]]]))
+    # largest = largest[::rev]
+    # circular_largest = list(map(lambda x: positions[x], largest*2))
+    # concavity = [ang(circular_largest[i:i+3]) for i in range(len(largest))]
+    # concavity_sign = [x < 0 for x in concavity]
     
-    if concavity_sign.count(True) > 1:
-        return False, None, None
+    # if concavity_sign.count(True) > 1:
+    #     return False, None, None
     
-    return True, nx.cycle_graph(largest), 2*math.pi + (0 if True not in concavity_sign else concavity[concavity_sign.index(True)])
+    # return True, nx.cycle_graph(largest), 2*math.pi + (0 if True not in concavity_sign else concavity[concavity_sign.index(True)])
+
+def sphere_coord(angles):
+    if len(angles) == 1:
+        return np.array([np.cos(angles[0]), np.sin(angles[0])])
+    return np.concatenate(([np.cos(angles[0])], sphere_coord(angles[1:])*np.sin(angles[0])), axis=0)
+

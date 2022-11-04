@@ -144,7 +144,8 @@ while True:
         import sys
         sys.exit(0)
     if event == 'analyze':
-        valid, *polygon_props = validate_polygon((net_state['positions'], net_state['adj_list']))
+        # valid, *polygon_props = validate_polygon((net_state['positions'], net_state['adj_list']))
+        polygon_nodes = validate_polygon((net_state['positions'], net_state['adj_list']))
         # if valid:
         break
     if event in toggle:
@@ -167,14 +168,13 @@ from matplotlib import cm
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
-polygon = net_state['positions'], parse_polygon(net_state['adj_list'])
-polygon = Polygon([polygon[0][i] for i in range(1, len(polygon[0])+1)])
+polygon = Polygon([net_state['positions'][i] for i in polygon_nodes])
 
 sol = boundary_approx(30, polygon)
 xx = np.linspace(-1, 1, 100)
 yy = np.linspace(-1, 1, 100)
 X, Y = np.meshgrid(xx, yy)
-ax.plot_surface(X, Y, sol.n_sol(3)(X, Y)**2, cmap=cm.coolwarm, alpha=0.9,)
+ax.plot_surface(X, Y, sol.n_sol(1)(X, Y)**2, cmap=cm.viridis, alpha=0.9,)
 polygon.draw()
 plt.show()
 
