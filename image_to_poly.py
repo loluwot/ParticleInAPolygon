@@ -22,6 +22,6 @@ def to_poly(im_name):
     # # # ax.scatter(*zip(*ps))
     # ax.add_patch(PolygonPatch(alpha_shape, alpha=0.2))
     # plt.show()
-    return alpsha_shape.exterior.coords
+    return alpha_shape.exterior.coords
 
 # to_poly('trollface.png')
