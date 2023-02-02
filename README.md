@@ -7,5 +7,6 @@ Implementation of this paper: https://arxiv.org/pdf/0801.4291.pdf
 **Added features**
 - load sillhoutte of image
 - time dependent animations
+- arbitrary potential function
 
 <img src="test.gif" alt="drawing" width="50%"/>
