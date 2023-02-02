@@ -31,8 +31,15 @@ def lsinc_approx(N, zz):
         return res
     return approx
 
-def boundary_approx(N, polygon):
-    m_og = [(x, y) for x in range(-N//2 + 1, N//2) for y in range(-N//2 + 1, N//2) if polygon.in_poly((x*2/N, y*2/N))]
+def boundary_approx(N, polygon, potential_function = lambda x, y: 0):
+    
+    bbox = polygon.bbox()
+    print(bbox)
+    # conversion_func = lambda point: [(amin + (amax - amin)*(a + N//2 - 1)/(N - 1)) for (amin, amax), a in zip(bbox, point)]
+    conversion_func = lambda point: [a*2/N for a in point]
+
+    m_og = [(x, y) for x in range(-N//2 + 1, N//2) for y in range(-N//2 + 1, N//2) if polygon.in_poly(conversion_func((x, y)))]
+    print(len(m_og))
     def c2(k, j):
         if k == j:
             return -pi**2/24*(1 + 2*N**2 - 3/(math.cos(j*pi/N)**2))
@@ -44,15 +51,22 @@ def boundary_approx(N, polygon):
             k, kp = m_og[i]
             l, lp = m_og[j]
             h[i][j] = -((c2(k, l) if kp == lp else 0) + (c2(kp, lp) if k == l else 0))
+        h[i][i] += potential_function(*conversion_func(m_og[i]))
+    print(h)
     sol_eig, sol_vec = np.linalg.eig(h)
     sols = [sol_vec[:,i] for i in sorted(range(len(sol_eig)), key=lambda i: sol_eig[i])]
     sol_energy = sorted(sol_eig)
     return Solution(sol_energy, sols, m_og, N)
 
 class Polygon:
-    def __init__(self, points): #assume adjacent points are connected
-        self.points = points
-        self.normalize()
+    def __init__(self, points, normalize=True): #assume adjacent points are connected
+        self.points = np.array(points)
+        if normalize:
+            self.normalize()
+
+    @classmethod
+    def ngon(cls, r, n, **args):
+        return cls([(r*math.cos(2*pi*i/n), r*math.sin(2*pi*i/n)) for i in range(n)], **args)
 
     def normalize(self):
         x, y = zip(*self.points)
@@ -63,8 +77,9 @@ class Polygon:
         
     def bbox(self):
         return (np.min(self.points[:, 0]), np.max(self.points[:, 0])), (np.min(self.points[:, 1]), np.max(self.points[:, 1]))
-
+        #xmin, xmax, ymin, ymax
     def in_poly(self, point):
+        # print('IN POLY', point)
         points = self.points
         px, py = point
         crossings = 0
